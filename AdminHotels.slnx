@@ -1,0 +1,25 @@
+<Solution>
+  <Folder Name="/Src/" />
+  <Folder Name="/Src/AdminService/">
+    <Project Path="Src/AdminService/AdminService.Api/AdminService.Api.csproj" />
+    <Project Path="Src/AdminService/AdminService.Application/AdminService.Application.csproj" />
+    <Project Path="Src/AdminService/AdminService.Domain/AdminService.Domain.csproj" />
+    <Project Path="Src/AdminService/AdminService.Infrastructure/AdminService.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Src/ApiGateway/">
+    <Project Path="Src/ApiGateway/ApiGateway/ApiGateway.csproj" />
+  </Folder>
+  <Folder Name="/Src/BookingService/">
+    <Project Path="Src/BookingService/BookingService.Api/BookingService.Api.csproj" />
+    <Project Path="Src/BookingService/BookingService.Application/BookingService.Application.csproj" />
+    <Project Path="Src/BookingService/BookingService.Domain/BookingService.Domain.csproj" />
+    <Project Path="Src/BookingService/BookingService.Infrastructure/BookingService.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Src/NotificationService/">
+    <Project Path="Src/NotificationService/NotificationService.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/AdminService.Tests/AdminService.Tests.csproj" />
+    <Project Path="Tests/BookingService.Tests/BookingService.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,119 @@
+services:
+  admin-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: admin_user
+      POSTGRES_PASSWORD: admin_password
+      POSTGRES_DB: admin_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - admin-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin_user -d admin_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  booking-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: booking_user
+      POSTGRES_PASSWORD: booking_password
+      POSTGRES_DB: booking_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - booking-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U booking_user -d booking_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  admin-service:
+    build:
+      context: .
+      dockerfile: Src/AdminService/Dockerfile
+    ports:
+      - "8081:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=admin-db;Database=admin_db;Username=admin_user;Password=admin_password
+      - RabbitMq__Host=rabbitmq
+      - Jwt__Key=AdminHotels_Super_Secret_Key_2025!_MustBe32CharLong
+      - Jwt__Issuer=AdminHotels
+      - Jwt__Audience=AdminHotels
+      - ASPNETCORE_URLS=http://+:8080
+    depends_on:
+      admin-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  booking-service:
+    build:
+      context: .
+      dockerfile: Src/BookingService/Dockerfile
+    ports:
+      - "8082:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=booking-db;Database=booking_db;Username=booking_user;Password=booking_password
+      - RabbitMq__Host=rabbitmq
+      - Jwt__Key=AdminHotels_Super_Secret_Key_2025!_MustBe32CharLong
+      - Jwt__Issuer=AdminHotels
+      - Jwt__Audience=AdminHotels
+      - Services__AdminService=http://admin-service:8080/
+      - ASPNETCORE_URLS=http://+:8080
+      - MT_LICENSE=free_license
+    depends_on:
+      booking-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      admin-service:
+        condition: service_started
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: Src/NotificationService/Dockerfile
+    environment:
+      - RabbitMq__Host=rabbitmq
+      - MT_LICENSE=free_license
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Src/ApiGateway/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+    depends_on:
+      - admin-service
+      - booking-service
+
+volumes:
+  admin-db-data:
+  booking-db-data:

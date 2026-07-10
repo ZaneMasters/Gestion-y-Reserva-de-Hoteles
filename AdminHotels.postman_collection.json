@@ -1,0 +1,252 @@
+{
+  "info": {
+    "name": "AdminHotels API",
+    "description": "Colección completa para el sistema de gestión y reserva de hoteles.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "gateway_url", "value": "http://localhost:8080" },
+    { "key": "admin_url", "value": "http://localhost:8081" },
+    { "key": "booking_url", "value": "http://localhost:8082" },
+    { "key": "token", "value": "" },
+    { "key": "hotel_id", "value": "" },
+    { "key": "room_id", "value": "" },
+    { "key": "booking_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.token) { pm.collectionVariables.set('token', json.token); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"username\": \"admin\", \"password\": \"admin123\" }"
+            },
+            "url": { "raw": "{{gateway_url}}/api/auth/login", "host": ["{{gateway_url}}"], "path": ["api", "auth", "login"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Hotels",
+      "item": [
+        {
+          "name": "GET - Listar hoteles",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{gateway_url}}/api/hotels", "host": ["{{gateway_url}}"], "path": ["api", "hotels"] }
+          }
+        },
+        {
+          "name": "GET - Detalle de hotel",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{gateway_url}}/api/hotels/{{hotel_id}}", "host": ["{{gateway_url}}"], "path": ["api", "hotels", "{{hotel_id}}"] }
+          }
+        },
+        {
+          "name": "POST - Crear hotel",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.hotelId) { pm.collectionVariables.set('hotel_id', json.hotelId); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Hotel Royal Bogotá\",\n  \"city\": \"Bogotá\",\n  \"address\": \"Calle 100 #15-20\",\n  \"description\": \"Hotel de lujo en el norte de Bogotá\"\n}"
+            },
+            "url": { "raw": "{{gateway_url}}/api/hotels", "host": ["{{gateway_url}}"], "path": ["api", "hotels"] }
+          }
+        },
+        {
+          "name": "PUT - Actualizar hotel",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Hotel Royal Bogotá UPDATED\",\n  \"city\": \"Bogotá\",\n  \"address\": \"Calle 100 #15-20\",\n  \"description\": \"Hotel de lujo renovado\"\n}"
+            },
+            "url": { "raw": "{{gateway_url}}/api/hotels/{{hotel_id}}", "host": ["{{gateway_url}}"], "path": ["api", "hotels", "{{hotel_id}}"] }
+          }
+        },
+        {
+          "name": "PATCH - Cambiar estado hotel",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{ \"isEnabled\": false }" },
+            "url": { "raw": "{{gateway_url}}/api/hotels/{{hotel_id}}/status", "host": ["{{gateway_url}}"], "path": ["api", "hotels", "{{hotel_id}}", "status"] }
+          }
+        },
+        {
+          "name": "DELETE - Eliminar hotel (lógico)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{gateway_url}}/api/hotels/{{hotel_id}}", "host": ["{{gateway_url}}"], "path": ["api", "hotels", "{{hotel_id}}"] }
+          }
+        },
+        {
+          "name": "GET - Reservas del hotel",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{gateway_url}}/api/bookings/hotel/{{hotel_id}}", "host": ["{{gateway_url}}"], "path": ["api", "bookings", "hotel", "{{hotel_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rooms",
+      "item": [
+        {
+          "name": "GET - Habitaciones de un hotel",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{gateway_url}}/api/hotels/{{hotel_id}}/rooms", "host": ["{{gateway_url}}"], "path": ["api", "hotels", "{{hotel_id}}", "rooms"] }
+          }
+        },
+        {
+          "name": "POST - Agregar habitación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.roomId) { pm.collectionVariables.set('room_id', json.roomId); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"Suite\",\n  \"baseCost\": 350000,\n  \"taxes\": 63000,\n  \"location\": \"Piso 10, vista al parque\"\n}"
+            },
+            "url": { "raw": "{{gateway_url}}/api/hotels/{{hotel_id}}/rooms", "host": ["{{gateway_url}}"], "path": ["api", "hotels", "{{hotel_id}}", "rooms"] }
+          }
+        },
+        {
+          "name": "PUT - Actualizar habitación",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"Suite Presidencial\",\n  \"baseCost\": 500000,\n  \"taxes\": 90000,\n  \"location\": \"Piso 15, vista panorámica\"\n}"
+            },
+            "url": { "raw": "{{gateway_url}}/api/hotels/{{hotel_id}}/rooms/{{room_id}}", "host": ["{{gateway_url}}"], "path": ["api", "hotels", "{{hotel_id}}", "rooms", "{{room_id}}"] }
+          }
+        },
+        {
+          "name": "PATCH - Cambiar estado habitación",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{ \"isEnabled\": false }" },
+            "url": { "raw": "{{gateway_url}}/api/hotels/{{hotel_id}}/rooms/{{room_id}}/status", "host": ["{{gateway_url}}"], "path": ["api", "hotels", "{{hotel_id}}", "rooms", "{{room_id}}", "status"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "GET - Buscar disponibilidad",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{gateway_url}}/api/bookings/available?city=Bogotá&arrival=2025-12-01&departure=2025-12-05&guests=2",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "bookings", "available"],
+              "query": [
+                { "key": "city", "value": "Bogotá" },
+                { "key": "arrival", "value": "2025-12-01" },
+                { "key": "departure", "value": "2025-12-05" },
+                { "key": "guests", "value": "2" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST - Crear reserva",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.bookingId) { pm.collectionVariables.set('booking_id', json.bookingId); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hotelId\": \"{{hotel_id}}\",\n  \"roomId\": \"{{room_id}}\",\n  \"guestFirstName\": \"Juan\",\n  \"guestLastName\": \"Pérez\",\n  \"guestDateOfBirth\": \"1990-05-15\",\n  \"guestGender\": \"M\",\n  \"guestDocumentType\": \"CC\",\n  \"guestDocumentNumber\": \"123456789\",\n  \"guestEmail\": \"juan.perez@email.com\",\n  \"guestPhone\": \"3001234567\",\n  \"arrivalDate\": \"2025-12-01\",\n  \"departureDate\": \"2025-12-05\",\n  \"numberOfGuests\": 2,\n  \"emergencyContactName\": \"María Pérez\",\n  \"emergencyContactPhone\": \"3009876543\"\n}"
+            },
+            "url": { "raw": "{{gateway_url}}/api/bookings", "host": ["{{gateway_url}}"], "path": ["api", "bookings"] }
+          }
+        },
+        {
+          "name": "GET - Detalle de reserva",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{gateway_url}}/api/bookings/{{booking_id}}", "host": ["{{gateway_url}}"], "path": ["api", "bookings", "{{booking_id}}"] }
+          }
+        }
+      ]
+    }
+  ]
+}
