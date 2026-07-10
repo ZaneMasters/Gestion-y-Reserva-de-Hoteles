@@ -46,7 +46,7 @@ public class SearchAvailableRoomsQueryHandler : IRequestHandler<SearchAvailableR
             {
                 // Step 3: Check for overlapping bookings in our own DB
                 var overlaps = await _bookingRepository.GetOverlappingBookingsAsync(
-                    room.Id, request.ArrivalDate, request.DepartureDate);
+                    room.Id, request.ArrivalDate.ToUniversalTime(), request.DepartureDate.ToUniversalTime());
 
                 if (!overlaps.Any())
                 {

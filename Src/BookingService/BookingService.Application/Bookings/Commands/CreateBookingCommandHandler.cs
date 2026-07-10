@@ -20,15 +20,15 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
     public async Task<Guid> Handle(CreateBookingCommand request, CancellationToken cancellationToken)
     {
         // 1. Register Guest
-        var guest = new Guest(request.GuestFirstName, request.GuestLastName, request.GuestDateOfBirth,
+        var guest = new Guest(request.GuestFirstName, request.GuestLastName, request.GuestDateOfBirth.ToUniversalTime(),
             request.GuestGender, request.GuestDocumentType, request.GuestDocumentNumber,
             request.GuestEmail, request.GuestPhone);
         
         await _bookingRepository.AddGuestAsync(guest);
 
         // 2. Create Booking
-        var booking = new Booking(request.HotelId, request.RoomId, guest.Id, request.ArrivalDate,
-            request.DepartureDate, request.NumberOfGuests, request.EmergencyContactName,
+        var booking = new Booking(request.HotelId, request.RoomId, guest.Id, request.ArrivalDate.ToUniversalTime(),
+            request.DepartureDate.ToUniversalTime(), request.NumberOfGuests, request.EmergencyContactName,
             request.EmergencyContactPhone);
 
         await _bookingRepository.AddAsync(booking);
